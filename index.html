@@ -44,6 +44,9 @@ nav.tabs .count{font-size:.75rem;background:var(--surface-2);border-radius:99px;
 .list{display:flex;flex-direction:column;gap:10px}
 .quest{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .quest.done{opacity:.8}
+.quest.open{border-color:var(--info);box-shadow:0 0 0 1px var(--info)}
+.quest.open .qhead{background:var(--info-soft)}
+.quest.open .qhead:hover{background:var(--info-soft)}
 .qhead{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px;cursor:pointer;background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit}
 .qhead:hover{background:var(--surface-2)}
 .qtitle{font-weight:700;font-size:1.02rem;min-width:0}
@@ -73,7 +76,10 @@ ol.steps li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-item
 ol.steps li:hover{background:var(--surface-2)}
 ol.steps li.is-next{background:var(--accent-soft)}
 ol.steps input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);cursor:pointer}
-ol.steps li.checked .stext{text-decoration:line-through;color:var(--muted)}
+ol.steps li.checked{background:var(--ok-soft)}
+ol.steps li.checked + li.checked{border-top:1px solid var(--surface)}
+ol.steps li.checked .stext{color:var(--ok)}
+ol.steps li.checked .snote{color:var(--ok);opacity:.85}
 .stext{min-width:0}
 .snote{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
 .slvl{font-size:.72rem;font-weight:700;white-space:nowrap;padding:2px 7px;border-radius:6px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
@@ -280,7 +286,7 @@ a{color:var(--info)}
       total ? el('div',{class:'prog'}, el('div',{class:'bar'}, el('i',{style:'width:'+Math.round(d/total*100)+'%'})), d+' / '+total+' Schritte') : null,
       (n && !open) ? el('div',{class:'next'}, el('b',{text:'Als Nächstes: '}), n.text, ' ', el('span',{class:'slvl '+lvlClass(n.level ?? e.minLevel), text:lvlText(n.level ?? e.minLevel)})) : null
     );
-    const card = el('article',{class:'quest'+(isDone(e)?' done':'')}, head);
+    const card = el('article',{class:'quest'+(isDone(e)?' done':'')+(open?' open':'')}, head);
     if (!open) return card;
 
     const body = el('div',{class:'qbody'});
