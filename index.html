@@ -1,0 +1,323 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Forever Questbuch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: ein schmales Questlog — Kopf mit Level-Regler, Reiter, darunter aufklappbare Questkarten mit Schritt-Checklisten */
+:root{
+  --bg:#f3f1ec; --surface:#fffdf8; --surface-2:#ece8df; --fg:#1d1b18; --muted:#6b655b; --line:#ddd6c8;
+  --accent:#a8780f; --accent-soft:#f3e4bd; --accent-ink:#5a3f02;
+  --ok:#2f7a45; --ok-soft:#dcefe1; --warn:#9a5b00; --warn-soft:#f7e6c8; --bad:#a3302a; --bad-soft:#f6dcd9; --info:#2d5e93; --info-soft:#dbe7f4;
+  --font-display:"Cinzel","Trajan Pro",Georgia,serif; --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --surface:#1c1f26; --surface-2:#252932; --fg:#ebe7de; --muted:#a39d91; --line:#323743;
+  --accent:#e2b247; --accent-soft:#3a3020; --accent-ink:#f3d58c;
+  --ok:#6cc488; --ok-soft:#1d3326; --warn:#e6a54a; --warn-soft:#3a2c17; --bad:#ec7b72; --bad-soft:#3d2221; --info:#7fb0e6; --info-soft:#1d2c3e;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --surface:#1c1f26; --surface-2:#252932; --fg:#ebe7de; --muted:#a39d91; --line:#323743;
+  --accent:#e2b247; --accent-soft:#3a3020; --accent-ink:#f3d58c;
+  --ok:#6cc488; --ok-soft:#1d3326; --warn:#e6a54a; --warn-soft:#3a2c17; --bad:#ec7b72; --bad-soft:#3d2221; --info:#7fb0e6; --info-soft:#1d2c3e;
+  color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 20px}
+h1{font-family:var(--font-display);font-size:1.75rem;letter-spacing:.02em;margin:0;line-height:1.1;text-wrap:balance}
+.sub{color:var(--muted);font-size:.85rem;margin-top:4px}
+.levelbox{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 8px 6px 12px}
+.levelbox label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.levelbox input{width:3.4em;font:inherit;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;background:var(--surface-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px}
+.stepper{font:inherit;width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);cursor:pointer;font-weight:700}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{font:inherit;font-weight:600;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav.tabs .count{font-size:.75rem;background:var(--surface-2);border-radius:99px;padding:1px 7px;margin-left:6px;color:var(--muted);font-variant-numeric:tabular-nums}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:99px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.search{flex:1 1 180px;min-width:0;font:inherit;font-size:.9rem;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.list{display:flex;flex-direction:column;gap:10px}
+.quest{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.quest.done{opacity:.8}
+.qhead{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px;cursor:pointer;background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit}
+.qhead:hover{background:var(--surface-2)}
+.qtitle{font-weight:700;font-size:1.02rem;min-width:0}
+.kind{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;display:block;margin-bottom:2px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;grid-column:1 / -1}
+.tag{font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
+.tag.lvl-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.lvl-high{background:var(--warn-soft);color:var(--warn)}
+.pill{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:99px;align-self:start;white-space:nowrap}
+.pill.offen{background:var(--info-soft);color:var(--info)}
+.pill.ungeloest{background:var(--bad-soft);color:var(--bad)}
+.pill.fertig{background:var(--ok-soft);color:var(--ok)}
+.pill.bald{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.vorbei{background:var(--surface-2);color:var(--muted)}
+.prog{grid-column:1 / -1;display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.next{grid-column:1 / -1;font-size:.88rem;color:var(--fg);min-width:0}
+.next b{color:var(--accent-ink);font-weight:700}
+.qbody{padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line)}
+.qbody p{margin:0;max-width:68ch}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin-bottom:6px}
+.reward{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 12px;font-size:.9rem}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+ol.steps li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:8px;border-radius:8px}
+ol.steps li:hover{background:var(--surface-2)}
+ol.steps li.is-next{background:var(--accent-soft)}
+ol.steps input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+ol.steps li.checked .stext{text-decoration:line-through;color:var(--muted)}
+.stext{min-width:0}
+.snote{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
+.slvl{font-size:.72rem;font-weight:700;white-space:nowrap;padding:2px 7px;border-radius:6px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
+.slvl.lvl-ok{background:var(--ok-soft);color:var(--ok)}
+.slvl.lvl-high{background:var(--warn-soft);color:var(--warn)}
+textarea{font:inherit;font-size:.9rem;width:100%;min-height:64px;resize:vertical;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);padding:8px 10px;box-sizing:border-box}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.gallery figure{margin:0;background:var(--surface-2);border-radius:8px;overflow:hidden}
+.gallery img{display:block;width:100%;height:auto}
+.gallery figcaption{font-size:.78rem;color:var(--muted);padding:6px 8px}
+.sources{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem}
+a{color:var(--info)}
+.news{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px}
+.news time{font-size:.8rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:2px}
+.news .nbody{min-width:0;display:flex;flex-direction:column;gap:6px}
+.news h3{margin:0;font-size:1rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.news ul{margin:0;padding-left:18px}
+.news.past{opacity:.7}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--fg);margin-bottom:4px}
+.notice{font-size:.85rem;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.85rem;z-index:20}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:480px){.news{grid-template-columns:1fr}h1{font-size:1.45rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Forever Questbuch</h1>
+      <div class="sub" id="updated">Quests, Geheimnisse und News aus WoW Forever</div>
+    </div>
+    <div class="levelbox">
+      <label for="lvl">Mein Level</label>
+      <button class="stepper" id="lvlDown" aria-label="Level verringern">−</button>
+      <input id="lvl" type="number" min="1" max="60" inputmode="numeric">
+      <button class="stepper" id="lvlUp" aria-label="Level erhöhen">+</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Bereiche">
+    <button role="tab" id="tab-quests" data-tab="quests">Quests &amp; Geheimnisse<span class="count" id="c-quests">0</span></button>
+    <button role="tab" id="tab-news" data-tab="news">News<span class="count" id="c-news">0</span></button>
+    <button role="tab" id="tab-done" data-tab="done">Erledigt<span class="count" id="c-done">0</span></button>
+  </nav>
+
+  <div class="toolbar" id="toolbar">
+    <button class="chip" data-filter="alle">Alle</button>
+    <button class="chip" data-filter="jetzt">Jetzt machbar</button>
+    <button class="chip" data-filter="ungeloest">Ungelöste Rätsel</button>
+    <input class="search" id="q" type="search" placeholder="Suchen (Name, Gebiet, Belohnung …)">
+  </div>
+
+  <div id="notice" class="notice" hidden></div>
+  <main id="list" class="list" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script id="questdata" type="application/json">{"entries": [{"faction": "Beide", "kind": "item", "minLevel": 1, "reward": "10 Bücher: Halskette · 20 Bücher: Ring · 25–38 Bücher: Truthseeker's Bow (oder Schild/Nebenhand)", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}, {"title": "LostWoW: Forever Secrets", "url": "https://lostwow.com/ForeverSecrets.shtml"}], "status": "offen", "steps": [{"id": "s1", "level": 1, "text": "10 Bücher abgeben → Halskette"}, {"id": "s2", "level": 1, "text": "20 Bücher abgeben → Ring"}, {"id": "s3", "level": 45, "text": "Genug Bücher für die Truthseeker-Auswahl abgeben (Angaben 25–38)"}], "summary": "In der Welt liegen Bücher herum. Abgabe bei Owen Thadd im Magierviertel von Unterstadt (74, 32). Fundorte sind noch nicht komplett dokumentiert.", "tags": ["Sammeln", "Bogen", "Ring"], "title": "Bibliotheksbücher für Owen Thadd", "zone": "Überall, Abgabe Unterstadt", "id": "bibliotheksbuecher"}, {"faction": "Beide (Horde-Weg)", "found": "2026-11-10", "kind": "secret", "minLevel": 10, "reward": "Eluvi'ana (grünes Einhandschwert) nach Teil 1. Endbelohnung noch unbekannt, vermutlich Eluvi'tor.", "sources": [{"title": "GameFragger: Quest Chain Zephras Isle → Dire Maul", "url": "https://gamefragger.com/pc/warcraft/wow-forever-players-uncover-a-secret-weapon-quest-chain-that-spans-zephras-isle-to-dire-maul-a30104"}, {"title": "Guided News: Dawn Waker Secret", "url": "https://guided.news/en/news/wow-forever-dawn-waker-secret-eluvi-ana/"}], "status": "ungeloest", "steps": [{"id": "s1", "level": 1, "note": "Skyborne: Quest „Coming of Age“ (hast du schon). Andere Völker: oberstes Stockwerk eines Gebäudes nahe Thendal Village.", "text": "Uralten Erbring holen"}, {"id": "s2", "level": 20, "text": "Dämmerwald: Quest „An Unfortunate End“ an der Leiche einer Nachtwache → Nachtwächterfackel"}, {"id": "s3", "level": 20, "text": "Fackel in den Ruinen von Ban'aethal (Zephras Isle) benutzen → Uralter Griff"}, {"id": "s4", "level": 20, "note": "Die Klinge erscheint an einem zufälligen Ort.", "text": "Griff zu Ealaane Nimbuswalker bringen, dann die Uralte Skyborne-Klinge finden → Eluvi'ana"}, {"id": "s5", "level": 22, "note": "Horde-Weg. Passt gut zur Eschental-Route.", "text": "Tiefschwarze Grotte: Baron Aquanis besiegen → Befleckte Wasserkugel"}, {"id": "s6", "level": 22, "text": "Wasserkugel zu Je'neu im Zoram'gar-Außenposten (Eschental) bringen"}, {"id": "s7", "level": 22, "text": "Mit angelegtem Erbring mit einem Hochgeborenen-Geist am Zoramstrand sprechen"}, {"id": "s8", "level": null, "text": "Narassin auf dem Turm von Althalaxx besiegen → Azsharischer Schlüssel & Narassins Foliant"}, {"id": "s9", "level": 40, "note": "Level geschätzt.", "text": "Für Mordent Evenshade (Shen'dralar): Stern der Elune aus dem 5er-Gewölbe in Südferalas (4 Uralte Schalter)"}, {"id": "s10", "level": 45, "note": "Braucht die Questreihe Kirith & Azsharite. Level geschätzt.", "text": "Abyssal-Partikel aus der Unterwasser-Truhe in Azshara"}, {"id": "s11", "level": 53, "note": "Level geschätzt.", "text": "Tränen der Qual am See Kel'theril in Winterquell sammeln"}, {"id": "s12", "level": null, "text": "Schrein der Vereinigung am Hyjal → Gereinigte Wasserkugel"}, {"id": "s13", "level": 55, "note": "Ungelöst: vermutlich Wohlwollend beim Ruf der Shen'dralar nötig.", "text": "Düsterbruch: mit Prinz Tortheldrin sprechen (erwähnt Eluvi'ana & Eluvi'tor)"}], "summary": "Lange Geheimnis-Kette über mindestens 6 Gebiete. Teile 1–6 sind kartiert, danach ist die Spur offen. Spätere Teile brauchen vermutlich Level 40+.", "tags": ["Waffe", "Schwert", "Furor", "Erbring"], "title": "Dawn Waker: Eluvi'ana & Eluvi'tor", "zone": "Zephras Isle → Düsterbruch", "id": "dawn-waker"}, {"faction": "Horde", "kind": "pet", "minLevel": 1, "reward": "Haustier Excitable Slime", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}], "status": "offen", "steps": [{"id": "s1", "level": 1, "text": "Bei Boyle in Unterstadt (56, 64) Nutritious Slime Sludge kaufen"}, {"id": "s2", "level": 1, "text": "In den Kanal springen und den Schleim suchen"}, {"id": "s3", "level": 1, "text": "Den Schleim mit /dance antanzen, bis er eine Quest gibt"}, {"id": "s4", "level": 1, "text": "Sludge abgeben → Haustier"}], "tags": ["Haustier"], "title": "Haustier: Excitable Slime", "zone": "Unterstadt", "id": "excitable-slime"}, {"faction": "Horde", "kind": "quest", "minLevel": 24, "reward": "Teleport direkt zum Eingang von Gnomeregan", "sources": [{"title": "Warcraft Tavern: Gnomeregan", "url": "https://www.warcrafttavern.com/forever/guides/gnomeregan/"}], "status": "offen", "steps": [{"id": "s1", "level": 24, "text": "Bei Sovik in Orgrimmar „Chief Engineer Scooty“ annehmen"}, {"id": "s2", "level": 24, "text": "In Beutebucht den Goblin-Transponder freischalten"}, {"id": "s3", "level": 24, "text": "Transponder benutzen, sobald ihr nach Gnomeregan wollt"}], "summary": "Spart den langen Weg durch Dun Morogh.", "tags": ["Teleport", "Dungeon"], "title": "Gnomeregan-Transponder", "zone": "Orgrimmar, Beutebucht", "id": "gnomeregan-transponder"}, {"faction": "Beide", "kind": "pet", "minLevel": 1, "reward": "Frosch-Haustier", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}], "status": "offen", "steps": [{"id": "s1", "level": 1, "text": "Neben die Frösche bei (51.5, 72.1) stellen und /sing tippen"}, {"id": "s2", "level": 1, "text": "Frosch vom Baumstamm einsammeln"}], "tags": ["Haustier"], "title": "Haustier: Musical Gustjumper", "zone": "Zephras Isle (51.5, 72.1)", "id": "gustjumper"}, {"faction": "Horde", "kind": "secret", "minLevel": null, "reward": "Bosskämpfe: The Abandoned & Viktor the Vile", "sources": [{"title": "LostWoW: Forever Secrets", "url": "https://lostwow.com/ForeverSecrets.shtml"}], "status": "offen", "steps": [{"id": "s1", "level": null, "text": "Statue in den Ruinen untersuchen"}, {"id": "s2", "level": null, "text": "Kamin in den Ruinen untersuchen"}, {"id": "s3", "level": null, "text": "The Abandoned und Viktor the Vile besiegen"}], "summary": "Wird über eine Statue und einen Kamin in den Ruinen beschworen. Genauer Ablauf und Level noch unklar.", "tags": ["Boss"], "title": "Geheime Bosse in den Ruinen von Lordaeron", "zone": "Ruinen von Lordaeron (über Unterstadt)", "id": "lordaeron-bosse"}, {"faction": "Beide", "kind": "secret", "minLevel": 22, "reward": "Versteckter Bosskampf", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}], "status": "offen", "steps": [{"id": "s1", "level": 22, "text": "Burg Schattenfang: nach Arugal das Buch auf seinem Tisch anklicken → Black Tome"}, {"id": "s2", "level": 22, "text": "Black Tome am Ambermill Leyline Focus im Silberwald benutzen → Tome of Dalaran"}, {"id": "s3", "level": 28, "text": "City of Dalaran: nach Atrexis durch die Kanalisation zur lila Rune und den Tome benutzen"}], "tags": ["Dungeon", "Boss"], "title": "Geheimer Boss: Lyn the Ignored", "zone": "Burg Schattenfang, Silberwald, Dalaran", "id": "lyn-the-ignored"}, {"category": "Geheimnis", "found": "2026-11-10", "kind": "news", "sources": [{"title": "GameFragger", "url": "https://gamefragger.com/pc/warcraft/wow-forever-players-uncover-a-secret-weapon-quest-chain-that-spans-zephras-isle-to-dire-maul-a30104"}], "summary": "Geheimnisjäger haben eine 6-teilige Kette von Zephras Isle bis Düsterbruch kartiert. Details im Reiter Quests.", "title": "Dawn-Waker-Kette entdeckt", "id": "n-dawnwaker"}, {"category": "Community", "found": "2026-11-11", "kind": "news", "sources": [{"title": "ForeverChanges: Hidden Items", "url": "https://foreverchanges.pro/hidden-items"}], "summary": "ForeverChanges zählt, wie viele Gegenstände aus den Spieldateien schon im Spiel entdeckt wurden.", "title": "Über 6.000 von 12.700 versteckten Gegenständen gefunden", "id": "n-hidden-items"}, {"category": "Hotfix", "found": "2026-11-06", "kind": "news", "points": ["Händler für Handwerksbedarf auf Zephras verkauft wieder Berufstaschen für Lehrlinge", "Ebenenlaufen-Stapeln in Schlachtfeldern behoben", "Leerwandler haben mehr Leben", "Murlocs im Rotkammgebirge respawnen nicht mehr zu schnell"], "sources": [{"title": "Mein-MMO", "url": "https://mein-mmo.de/wow-forever-hotfixes-5-6-november-2026-patch-notes/"}, {"title": "Blizzard", "url": "https://news.blizzard.com/en-us/article/24315281"}], "title": "Hotfixes 5./6. November", "id": "n-hotfix-1106"}, {"category": "Hotfix", "found": "2026-11-10", "kind": "news", "points": ["Jägerbegleiter werden robuster (näher an Classic Era)", "Verstärker-Schamanen: Stärke soll wichtigster Wert werden", "Gebrechen-Hexer: DoTs bleiben neben Wrack lohnend", "Krieger: nur Tooltip-Fix bei Reckless Swings"], "sources": [{"title": "GamerFuzion", "url": "https://www.gamerfuzion.com/world-of-warcraft-forever-class-tuning-november-10-pets-affliction-enhancement-shaman-hotfixes/"}], "title": "Klassen-Tuning", "id": "n-hotfix-1110"}, {"category": "Termin", "found": "2026-11-11", "kind": "news", "sources": [{"title": "AccountShark", "url": "https://accountshark.net/blog/wow-forever-legendary-taldramir-whispering-wood-questline-datamine-pouch-of-violet-dust"}], "status": "bald", "summary": "Laut AccountShark öffnet der Raid am 9. Dezember 2026.", "title": "Raid Hyjal-Gipfel öffnet am 9. Dezember", "id": "n-hyjal"}, {"category": "Ankündigung", "found": "2026-11-04", "kind": "news", "sources": [{"title": "AccountShark", "url": "https://accountshark.net/blog/wow-forever-legendary-taldramir-whispering-wood-questline-datamine-pouch-of-violet-dust"}], "status": "bald", "summary": "Erster neuer legendärer Zweihandstab. Questreihe laut Roadmap im Frühjahr 2027, noch nicht erhältlich.", "title": "Legendär angekündigt: Taldramir, das flüsternde Holz", "id": "n-taldramir"}, {"category": "Event", "found": "2026-11-04", "kind": "news", "status": "vorbei", "summary": "Spielzeug, das Lagerfeuer lila färbt. Nur am Release-Tag über Twitch, kein anderer Weg bekannt.", "title": "Twitch-Drop Pouch of Violet Dust", "id": "n-violet-dust"}, {"faction": "Beide", "kind": "item", "minLevel": 17, "reward": "Ring mit Set-Bonus", "sources": [{"title": "LostWoW: Forever Secrets", "url": "https://lostwow.com/ForeverSecrets.shtml"}], "status": "ungeloest", "steps": [{"id": "s1", "level": 17, "text": "First Mate Band in den Todesminen holen"}, {"id": "s2", "level": 60, "text": "Zweiten Ring finden (ungelöst)"}], "summary": "Der zweite Ring (Level 60) wurde noch nicht gefunden.", "tags": ["Ring", "Set"], "title": "Partners in Crime", "zone": "Todesminen", "id": "partners-in-crime"}, {"faction": "Beide", "kind": "item", "minLevel": 15, "reward": "2 Teile: +5 % Laufgeschwindigkeit im Brachland und Steinkrallengebirge", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}], "status": "offen", "steps": [{"id": "s1", "level": null, "text": "Humar der Stolzlord"}, {"id": "s2", "level": null, "text": "Swiftmane"}, {"id": "s3", "level": null, "text": "Takk der Springer"}], "summary": "Teile droppen von drei seltenen Gegnern im Brachland.", "tags": ["Set", "Laufgeschwindigkeit"], "title": "Segen von Kalimdor (Set)", "zone": "Brachland", "id": "segen-kalimdor"}, {"faction": "Beide", "kind": "secret", "minLevel": null, "reward": "Unbekannt", "sources": [{"title": "Icy Veins: Secret Nobody Has Solved Yet", "url": "https://www.icy-veins.com/wow-forever/news/wow-forever-players-are-chasing-a-secret-nobody-has-solved-yet/"}, {"title": "LostWoW: Forever Secrets", "url": "https://lostwow.com/ForeverSecrets.shtml"}], "status": "ungeloest", "steps": [{"id": "s1", "level": null, "text": "Verbrannte Seite finden"}, {"id": "s2", "level": null, "text": "Schlüsselsteinfragment finden"}, {"id": "s3", "level": null, "text": "Steinschlüssel herstellen"}, {"id": "s4", "level": null, "text": "Passendes Schloss finden (ungelöst)"}], "summary": "Spur aus Verbrannter Seite, Schlüsselsteinfragment und Steinschlüssel. Das passende Schloss hat noch niemand gefunden.", "tags": ["Rätsel"], "title": "Der Steinschlüssel", "zone": "Bis zum Schwarzfels", "id": "steinschluessel"}, {"faction": "Beide", "kind": "item", "minLevel": 15, "reward": "Essen, das dich in einen Ork-Ninja oder Ork-Piraten verwandelt", "sources": [{"title": "WoW Forever Secrets", "url": "https://wowclassicforever.info/secrets/"}], "status": "offen", "steps": [{"id": "s1", "level": 15, "text": "Rezept farmen (z. B. von den großen Hauerbachen im Rotkammgebirge)"}, {"id": "s2", "level": 15, "text": "Rezept lernen und kochen"}], "tags": ["Kochen", "Spaß"], "title": "Savory Whimsyfin Delight", "zone": "Rotkammgebirge", "id": "whimsyfin"}, {"faction": "Horde", "kind": "quest", "minLevel": 30, "reward": "Berserkerhaltung, dann Wirbelwindaxt / -schwert / -hammer (2H, +16 Stärke, +15 Ausdauer)", "sources": [{"title": "ConquestCapped: Warrior Weapon Quest", "url": "https://conquestcapped.com/guides/wow-forever/wow-forever-warrior-weapon-quest/"}], "status": "offen", "steps": [{"id": "s1", "level": 30, "text": "Bei Sorek in Orgrimmar (80, 32) „The Islander“ annehmen"}, {"id": "s2", "level": 30, "text": "Zu Klannoc Macleod auf die Insel Fray im Brachland (68, 49)"}, {"id": "s3", "level": 30, "note": "Heiltränke mitnehmen, lieber auf 31–32. Nur solo möglich.", "text": "„The Affray“: Arena-Wellen und Big Will besiegen → Berserkerhaltung"}, {"id": "s4", "level": 30, "text": "Zu Bath'rah dem Windwächter im Alteracgebirge"}, {"id": "s5", "level": 30, "text": "8 Lebenswurz sammeln"}, {"id": "s6", "level": 30, "text": "30 Hauer der Blutskalpe im Schlingendorntal sammeln"}, {"id": "s7", "level": 33, "text": "Amulette von den Verbannten im Arathihochland holen"}, {"id": "s8", "level": 35, "note": "Am besten 1–2 Leute mitnehmen.", "text": "Cyclonian beschwören und besiegen (Elite, Stufe 40)"}, {"id": "s9", "level": 30, "text": "Belohnung wählen: Wirbelwindaxt"}], "summary": "Pflicht-Klassenquest für Krieger. Die Axt trägt dich locker bis Mitte 40, auch in Furor-Talenten.", "tags": ["Krieger", "Klassenquest", "Zweihand"], "title": "Berserkerhaltung & Wirbelwindaxt", "zone": "Brachland, Alterac, Arathi, Schlingendorn", "id": "wirbelwindaxt"}, {"faction": "Beide", "kind": "secret", "minLevel": 1, "reward": "Ausrüstung gegen Windstones", "sources": [{"title": "LostWoW: Forever Secrets", "url": "https://lostwow.com/ForeverSecrets.shtml"}], "status": "offen", "steps": [{"id": "s1", "level": null, "text": "Schrein auf Zephras Isle finden"}, {"id": "s2", "level": null, "text": "Windstones sammeln und bei Zendraas eintauschen"}], "tags": ["Händler"], "title": "Versteckter Händler: Brother Zendraas", "zone": "Zephras Isle (Schrein)", "id": "zendraas"}], "meta": {"updated": "2026-11-12"}}</script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const ls = {get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+  const state = {
+    entries: [], meta: null,
+    progress: ls.get('fq.progress', {done:{}, notes:{}}),
+    tab: ls.get('fq.tab','quests'), filter: ls.get('fq.filter','alle'),
+    level: ls.get('fq.level', 25), open: new Set(ls.get('fq.open', [])),
+    query: '', dbStatus: 'loading'
+  };
+  let progRef = null;
+
+  const KIND = {quest:'Quest', secret:'Geheimnis', pet:'Haustier', item:'Gegenstand', event:'Event'};
+  const STATUS = {offen:'Offen', ungeloest:'Ungelöst', fertig:'Gelöst', bald:'Bald', vorbei:'Vorbei'};
+
+  function el(tag, attrs, ...kids){
+    const n = document.createElement(tag);
+    if (attrs) for (const [k,v] of Object.entries(attrs)){
+      if (v==null || v===false) continue;
+      if (k==='class') n.className = v; else if (k==='text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v===true?'':v);
+    }
+    for (const c of kids.flat()) if (c!=null && c!==false) n.append(c.nodeType ? c : document.createTextNode(String(c)));
+    return n;
+  }
+  function fmtDate(s){ if(!s) return ''; const d=new Date(s+'T12:00:00'); return isNaN(d)?s:d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+  function safeUrl(u){ return typeof u==='string' && (/^https:\/\//.test(u) || u.startsWith('/')) ? u : null; }
+  function lvlText(l){ return l==null ? 'Level ?' : 'ab '+l; }
+  function lvlClass(l){ return l==null ? '' : (l <= state.level ? 'lvl-ok' : 'lvl-high'); }
+
+  const key = (e,s) => e.id+':'+s.id;
+  const steps = e => Array.isArray(e.steps) ? e.steps : [];
+  const doneCount = e => steps(e).filter(s => state.progress.done[key(e,s)]).length;
+  const isDone = e => steps(e).length>0 && doneCount(e)===steps(e).length;
+  const nextStep = e => steps(e).find(s => !state.progress.done[key(e,s)]);
+  const doable = e => { const n = nextStep(e); if(!n) return false; const l = n.level ?? e.minLevel; return l==null || l <= state.level; };
+
+  function matchesQuery(e){
+    if(!state.query) return true;
+    const hay = [e.title,e.summary,e.zone,e.reward,(e.tags||[]).join(' '),...steps(e).map(s=>s.text)].join(' ').toLowerCase();
+    return state.query.toLowerCase().split(/\s+/).every(w => hay.includes(w));
+  }
+
+  // ---------- Fortschritt speichern ----------
+  let writing=false, pending=false, noteTimer=null;
+  function saveProgress(){
+    ls.set('fq.progress', state.progress);
+    if(!progRef) return;
+    pending = true; if(writing) return; flush();
+  }
+  async function flush(){
+    while(pending){
+      pending=false; writing=true;
+      try{ await progRef.set(JSON.parse(JSON.stringify(state.progress))); }
+      catch(err){ toast('Fortschritt nur auf diesem Gerät gespeichert.'); }
+      writing=false;
+    }
+  }
+
+  let toastTimer;
+  function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.hidden=true,2600); }
+
+  // ---------- Render ----------
+  function render(){
+    const quests = state.entries.filter(e => e.kind!=='news');
+    const news = state.entries.filter(e => e.kind==='news');
+    const active = quests.filter(e => !isDone(e));
+    const done = quests.filter(isDone);
+    $('#c-quests').textContent = active.length; $('#c-news').textContent = news.length; $('#c-done').textContent = done.length;
+    document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab===state.tab)));
+    document.querySelectorAll('[data-filter]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter===state.filter)));
+    $('#toolbar').querySelectorAll('[data-filter]').forEach(b => b.hidden = state.tab!=='quests');
+    $('#lvl').value = state.level;
+    $('#updated').textContent = state.meta && state.meta.updated ? 'Zuletzt aktualisiert: '+fmtDate(state.meta.updated) : 'Quests, Geheimnisse und News aus WoW Forever';
+
+    const list = $('#list'); list.replaceChildren();
+    if (state.dbStatus==='loading' && !state.entries.length){ list.append(el('div',{class:'empty'}, el('strong',{text:'Questbuch wird geladen …'}),'Einen Moment.')); return; }
+    if (!state.entries.length){
+      list.append(el('div',{class:'empty'}, el('strong',{text:'Noch keine Einträge'}), 'Sag Claude „Update“, dann kommen neue Quests, Geheimnisse und News hier rein.'));
+      return;
+    }
+
+    if (state.tab==='news'){
+      const items = news.filter(matchesQuery).sort((a,b)=>(b.found||'').localeCompare(a.found||''));
+      if(!items.length) list.append(el('div',{class:'empty'}, el('strong',{text:'Keine News gefunden'}), 'Versuch einen anderen Suchbegriff.'));
+      items.forEach(n => list.append(newsCard(n)));
+      return;
+    }
+
+    let items = (state.tab==='done' ? done : active).filter(matchesQuery);
+    if (state.tab==='quests'){
+      if (state.filter==='jetzt') items = items.filter(doable);
+      if (state.filter==='ungeloest') items = items.filter(e => e.status==='ungeloest');
+    }
+    items.sort((a,b) => (Number(doable(b))-Number(doable(a))) || ((a.minLevel??99)-(b.minLevel??99)) || (a.title||'').localeCompare(b.title||''));
+    if(!items.length){
+      const msg = state.tab==='done' ? ['Noch nichts erledigt','Hak in einer Quest alle Schritte ab, dann landet sie hier.']
+        : state.filter==='jetzt' ? ['Gerade nichts auf deinem Level','Stell oben dein Level ein oder schau unter „Alle“.'] : ['Nichts gefunden','Versuch einen anderen Filter oder Suchbegriff.'];
+      list.append(el('div',{class:'empty'}, el('strong',{text:msg[0]}), msg[1]));
+    }
+    items.forEach(e => list.append(questCard(e)));
+  }
+
+  function questCard(e){
+    const total = steps(e).length, d = doneCount(e), n = nextStep(e), open = state.open.has(e.id);
+    const status = isDone(e) ? 'fertig' : (e.status || 'offen');
+    const head = el('button',{class:'qhead','aria-expanded':String(open), onclick:()=>{ open?state.open.delete(e.id):state.open.add(e.id); ls.set('fq.open',[...state.open]); render(); }},
+      el('div',{class:'qtitle'}, el('span',{class:'kind',text:KIND[e.kind]||'Eintrag'}), e.title||''),
+      el('span',{class:'pill '+status, text: isDone(e)?'Erledigt':(STATUS[status]||status)}),
+      el('div',{class:'meta'},
+        el('span',{class:'tag '+lvlClass(e.minLevel), text:lvlText(e.minLevel)}),
+        e.zone && el('span',{class:'tag',text:e.zone}),
+        e.faction && el('span',{class:'tag',text:e.faction}),
+        e.found && el('span',{class:'tag',text:'gefunden '+fmtDate(e.found)})
+      ),
+      total ? el('div',{class:'prog'}, el('div',{class:'bar'}, el('i',{style:'width:'+Math.round(d/total*100)+'%'})), d+' / '+total+' Schritte') : null,
+      (n && !open) ? el('div',{class:'next'}, el('b',{text:'Als Nächstes: '}), n.text, ' ', el('span',{class:'slvl '+lvlClass(n.level ?? e.minLevel), text:lvlText(n.level ?? e.minLevel)})) : null
+    );
+    const card = el('article',{class:'quest'+(isDone(e)?' done':'')}, head);
+    if (!open) return card;
+
+    const body = el('div',{class:'qbody'});
+    if (e.summary) body.append(el('p',{text:e.summary}));
+    if (e.reward) body.append(el('div',{class:'reward'}, el('strong',{text:'Belohnung: '}), e.reward));
+    if (total){
+      const ol = el('ol',{class:'steps'});
+      steps(e).forEach((s,i) => {
+        const k = key(e,s), checked = !!state.progress.done[k], id = 'cb-'+e.id+'-'+s.id;
+        const lvl = s.level ?? null;
+        ol.append(el('li',{class:(checked?'checked ':'')+(n===s?'is-next':'')},
+          el('input',{type:'checkbox',id, checked, onchange:ev=>{ if(ev.target.checked) state.progress.done[k]=true; else delete state.progress.done[k]; saveProgress(); render(); }}),
+          el('label',{class:'stext',for:id}, (i+1)+'. '+s.text, s.note ? el('span',{class:'snote',text:s.note}) : null),
+          el('span',{class:'slvl '+lvlClass(lvl), text: lvl==null ? '–' : 'ab '+lvl})
+        ));
+      });
+      body.append(el('div',null, el('div',{class:'label',text:'Schritte'}), ol));
+    }
+    if (Array.isArray(e.images) && e.images.length){
+      const g = el('div',{class:'gallery'});
+      e.images.forEach(im => { const u = safeUrl(im.url); if(u) g.append(el('figure',null, el('img',{src:u, alt:im.caption||'', loading:'lazy'}), im.caption ? el('figcaption',{text:im.caption}) : null)); });
+      body.append(el('div',null, el('div',{class:'label',text:'Bilder'}), g));
+    }
+    const ta = el('textarea',{id:'note-'+e.id, placeholder:'Eigene Notizen, z. B. Koordinaten oder wer mitkommt …', oninput:ev=>{ state.progress.notes[e.id]=ev.target.value; clearTimeout(noteTimer); noteTimer=setTimeout(saveProgress,900); }});
+    ta.value = state.progress.notes[e.id] || '';
+    body.append(el('div',null, el('label',{class:'label',for:'note-'+e.id,text:'Meine Notizen'}), ta));
+    if (Array.isArray(e.sources) && e.sources.length){
+      body.append(el('div',null, el('div',{class:'label',text:'Quellen'}),
+        el('div',{class:'sources'}, e.sources.map(s => { const u=safeUrl(s.url); return u ? el('a',{href:u,target:'_blank',rel:'noopener',text:s.title||u}) : null; }))));
+    }
+    card.append(body);
+    return card;
+  }
+
+  function newsCard(n){
+    const past = n.status==='vorbei';
+    const nb = el('div',{class:'nbody'},
+      el('h3',null, n.title||'', n.status ? el('span',{class:'pill '+n.status, text:STATUS[n.status]||n.status}) : null, n.category ? el('span',{class:'tag',text:n.category}) : null));
+    if (n.summary) nb.append(el('p',{text:n.summary, style:'margin:0'}));
+    if (Array.isArray(n.points) && n.points.length) nb.append(el('ul',null, n.points.map(p => el('li',{text:p}))));
+    if (Array.isArray(n.images) && n.images.length){
+      const g = el('div',{class:'gallery'}); n.images.forEach(im=>{const u=safeUrl(im.url); if(u) g.append(el('figure',null, el('img',{src:u,alt:im.caption||'',loading:'lazy'}), im.caption?el('figcaption',{text:im.caption}):null));}); nb.append(g);
+    }
+    if (Array.isArray(n.sources) && n.sources.length) nb.append(el('div',{class:'sources'}, n.sources.map(s => { const u=safeUrl(s.url); return u ? el('a',{href:u,target:'_blank',rel:'noopener',text:s.title||u}) : null; })));
+    return el('article',{class:'news'+(past?' past':'')}, el('time',{text:fmtDate(n.found)}), nb);
+  }
+
+  // ---------- Bedienung ----------
+  document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click',()=>{ state.tab=b.dataset.tab; ls.set('fq.tab',state.tab); render(); }));
+  document.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click',()=>{ state.filter=b.dataset.filter; ls.set('fq.filter',state.filter); render(); }));
+  function setLevel(v){ v = Math.max(1, Math.min(60, parseInt(v,10)||1)); state.level=v; ls.set('fq.level',v); render(); }
+  $('#lvl').addEventListener('change', ev => setLevel(ev.target.value));
+  $('#lvlUp').addEventListener('click', ()=>setLevel(state.level+1));
+  $('#lvlDown').addEventListener('click', ()=>setLevel(state.level-1));
+  $('#q').addEventListener('input', ev => { state.query = ev.target.value.trim(); render(); });
+
+  render();
+
+  // ---------- Daten (statisch eingebettet) ----------
+  try{
+    const DATA = JSON.parse(document.getElementById('questdata').textContent);
+    state.entries = DATA.entries || []; state.meta = DATA.meta || null;
+  }catch(e){ state.entries = []; }
+  state.dbStatus = 'ready'; render();
+
+  function showNotice(t){ const n=$('#notice'); n.textContent=t; n.hidden=false; }
+  function hideNotice(){ $('#notice').hidden=true; }
+})();
+</script>
+</body></html>
